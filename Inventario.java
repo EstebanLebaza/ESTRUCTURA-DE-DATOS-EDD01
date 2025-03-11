@@ -73,32 +73,30 @@ public class Inventario {
     }
 
     // Método para agregar un producto al final del inventario (lista enlazada)
-    public void append(Producto producto) {
+    public void add(Producto producto) {
         inventario.addLast(producto);
+        System.out.println("Producto agregado exitosamente.");
     }
 
-    // Obtener un producto en una posición específica
-    public Producto get(int i) {
-        if (i >= 0 && i < inventario.size()) {
-            return inventario.get(i);
-        }
-        return null; // Si el índice no existe
-    }
-
-    // Eliminar un producto si su cantidad es mayor que 0
-    public void remove() {
-        if (!inventario.isEmpty()) {
-            Producto producto = inventario.peekFirst();
-            if (producto.getCantidad() > 0) {
-                producto.setCantidad(producto.getCantidad() - 1); // Decrementar la cantidad del primer producto
-                System.out.println("Producto vendido: " + producto);
-                if (producto.getCantidad() == 0) {
-                    inventario.removeFirst(); // Si la cantidad llega a 0, eliminar el producto de la cola
-                    System.out.println("Producto eliminado porque la cantidad llegó a 0.");
+    // Método para eliminar un producto si su cantidad es mayor a 0
+    public void remove(int codigo) {
+        Producto productoAEliminar = buscarPorCodigo(codigo);
+        
+        if (productoAEliminar != null) {
+            if (productoAEliminar.getCantidad() > 0) {
+                productoAEliminar.setCantidad(productoAEliminar.getCantidad() - 1); // Decrementar la cantidad
+                System.out.println("Producto eliminado: " + productoAEliminar.getNombre() + " | Nueva cantidad: " + productoAEliminar.getCantidad());
+                
+                // Si la cantidad llega a 0, se elimina el producto de la lista
+                if (productoAEliminar.getCantidad() == 0) {
+                    inventario.remove(productoAEliminar);
+                    System.out.println("Producto completamente agotado y eliminado del inventario.");
                 }
             } else {
-                System.out.println("No hay productos disponibles para eliminar o la cantidad es 0.");
+                System.out.println("No se puede eliminar el producto porque su cantidad es 0.");
             }
+        } else {
+            System.out.println("Producto no encontrado.");
         }
     }
 
@@ -178,58 +176,10 @@ public class Inventario {
         }
     }
 
-    // Método para eliminar un producto por código o nombre
-    public void eliminarProducto() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("¿Quieres eliminar el producto por código o nombre?");
-        System.out.println("1. Código");
-        System.out.println("2. Nombre");
-        int opcion = scanner.nextInt();
-        scanner.nextLine(); // Limpiar el buffer
-
-        Producto productoAEliminar = null;
-
-        if (opcion == 1) {
-            System.out.println("Ingrese el código del producto a eliminar:");
-            int codigo = scanner.nextInt();
-            productoAEliminar = buscarPorCodigo(codigo);
-        } else if (opcion == 2) {
-            System.out.println("Ingrese el nombre del producto a eliminar:");
-            String nombre = scanner.nextLine();
-            productoAEliminar = buscarPorNombre(nombre);
-        } else {
-            System.out.println("Opción no válida.");
-            return;
-        }
-
-        // Si el producto fue encontrado
-        if (productoAEliminar != null) {
-            inventario.remove(productoAEliminar);
-            System.out.println("Producto eliminado: " + productoAEliminar.getNombre());
-        } else {
-            System.out.println("Producto no encontrado.");
-        }
-    }
-
-    // Método para ordenar los productos por código (usando Insertion Sort)
-    public static void insertSort(Producto[] productos, Comparator<Producto> comparador) {
-        for (int i = 1; i < productos.length; i++) {
-            Producto productoActual = productos[i];
-            int j = i - 1;
-
-            // Desplazamiento de elementos mayores al productoActual
-            while (j >= 0 && comparador.compare(productos[j], productoActual) > 0) {
-                productos[j + 1] = productos[j];
-                j--;
-            }
-            productos[j + 1] = productoActual;
-        }
-    }
-
     // Ordenar inventario por código
     public void ordenarPorCodigo() {
         Producto[] productosArray = inventario.toArray(new Producto[0]);
-        insertSort(productosArray, Producto.porCodigo);
+        Arrays.sort(productosArray, Producto.porCodigo);
         System.out.println("Inventario ordenado por código:");
         for (Producto p : productosArray) {
             p.mostrar();
@@ -239,7 +189,7 @@ public class Inventario {
     // Ordenar inventario por precio
     public void ordenarPorPrecio() {
         Producto[] productosArray = inventario.toArray(new Producto[0]);
-        insertSort(productosArray, Producto.porPrecio);
+        Arrays.sort(productosArray, Producto.porPrecio);
         System.out.println("Inventario ordenado por precio:");
         for (Producto p : productosArray) {
             p.mostrar();
@@ -279,14 +229,15 @@ public class Inventario {
                     int nuevaCantidad = scanner.nextInt();
 
                     Producto nuevoProducto = new Producto(nuevoCodigo, nuevoNombre, nuevoPrecio, nuevaCantidad);
-                    inventario.append(nuevoProducto);
-                    System.out.println("Producto agregado exitosamente.");
+                    inventario.add(nuevoProducto); // Agregar el producto al inventario
                     break;
                 case 3:
                     inventario.venderProducto();
                     break;
                 case 4:
-                    inventario.eliminarProducto();
+                    System.out.println("Ingrese el código del producto a eliminar:");
+                    int codigoEliminar = scanner.nextInt();
+                    inventario.remove(codigoEliminar); // Eliminar el producto del inventario
                     break;
                 case 5:
                     inventario.ordenarPorCodigo();
